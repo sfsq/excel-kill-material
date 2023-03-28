@@ -1,0 +1,108 @@
+redefineSkillInfo([{
+	skillName: "诛害",
+	newSkillName: "诛害2",
+	description: "其他角色的结束阶段，若其本回合造成的伤害数大于0，你可以选择一项：1.视为对其使用一张【杀】；2.视为对其使用一张【过河拆桥】"
+}, {
+	skillName: "自定",
+	newSkillName: "开挂",
+	description: "判定阶段/结束阶段，你可以选择至少一名其他角色，然后你对其造成100点伤害"
+}])
+// 添加技能兴乱!
+addNewSkill({
+	skillName: "兴乱!",
+	description: "出牌阶段限一次，当你使用的仅指定一个目标的牌结算后，你可以随机获得牌堆里的一张点数为6的牌（若没有则改为摸六张牌）。",
+	skillSound1: "fanchou_xingluan1",
+	skillSound2: "fanchou_xingluan2"
+})
+
+//添加武将界樊稠
+addNewWujiang({
+	name: "界樊稠",
+	healthLimitVal: 4,
+	extensionPackage: "界限突破",
+	skillList: ["兴乱!"],
+	country: "群",
+	sex: "男",
+	pictureName: "fanchou",
+	deathSoundName: "fanchou_zhenwang",
+	deathWord: "唉，稚然疑心，甚重。"
+
+})
+
+defineSkillTrigger("兴乱!", {
+	triggerPhase: ["使用结算结束后"],
+	triggerFunction: function(player, cardUserPlayer, card) {
+		var condition = player.isInPlayPhase() && player.playerId == cardUserPlayer.playerId && card
+			.targetPlayerNum == 1 && player.confirmInvokeSkill("兴乱!");
+		if (!condition) {
+			return false
+		}
+		player.printWithSkill("发动技能【兴乱!】", "兴乱!")
+		var result = player.getCard("6")
+		if (result) {
+			player.print("从牌堆中获得了一张点数为6的牌")
+		} else {
+			player.print("在牌堆中找不到点数为6的牌，改为摸6张");
+			player.drawCard(6)
+		}
+		player.markSkillUsed("兴乱!")
+		return true
+	}
+})
+
+
+defineSkillTrigger("诛害2", {
+	triggerPhase: ["结束阶段"],
+	triggerFunction: function(player, currentPlayer, isCurrentPlayer) {
+		//过河拆桥合法性检查
+		var guoheValid = player.checkValid("过河拆桥", currentPlayer, "无视距离")
+		//杀合法性检查
+		var shaValid = player.checkValid("杀", currentPlayer, "无视距离杀")
+		//非自己回合且可以使用杀或过河拆桥
+		var skillAvailable = !isCurrentPlayer && currentPlayer.damageCount > 0 && (guoheValid || shaValid)
+
+		if (skillAvailable && player.confirmInvokeSkillToEnemy("诛害2", currentPlayer)) {
+			// if(player.isAI()){
+			// return false
+			// }
+			player.printWithSkill("对" + currentPlayer.playerName + "说: 早知如此，何必当初", "诛害2")
+
+			var useSha = false
+			var useGuohe = false
+			// player.print("shaValid="+shaValid+",guoheValid="+guoheValid)
+			if (shaValid) {
+				if (guoheValid) {
+					if (player.confirmHint("确：使用杀，取：使用过河拆桥")) {
+						useSha = true
+					} else {
+						useGuohe = true
+					}
+				} else {
+					useSha = player.confirmHint("是否视为对" + currentPlayer.playerName + "使用杀？")
+				}
+			} else {
+				useGuohe = player.confirmHint("是否视为对" + currentPlayer.playerName + "使用过河拆桥？")
+			}
+			// player.print("useGuohe="+useGuohe+",useSha="+useSha)
+			if (useGuohe) {
+				player.useCardWithTarget("过河拆桥", currentPlayer, "诛害")
+			} else if (useSha) {
+				player.useCardWithTarget("杀", currentPlayer, "诛害")
+			}
+			return true
+		}
+		return false
+	}
+})
+
+defineSkillTrigger("开挂", {
+	triggerPhase: ["判定阶段", "结束阶段"],
+	triggerFunction: function(player, currentPlayer, isCurrentPlayer) {
+
+		if (isCurrentPlayer && player.confirmInvokeSkill("开挂")) {
+			player.chooseAndInvokeSkill("开挂")
+			return true
+		}
+		return false
+	}
+})

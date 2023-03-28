@@ -1,0 +1,19 @@
+defineSkill("开挂", {
+	invokeConditionSetting: function(player, skillName) {
+		var obj = {}
+		obj.maxTargetNum = 8
+		return obj
+	},
+	targetCondition: function(player, targetPlayer, skillName) {
+		return (targetPlayer.playerId != player.playerId) && targetPlayer.healthVal > 1
+	},
+	effect: function(player, targetPlayer, skillName) {
+		player.print("大喊：开了挂就是挂？")
+		player.printWithSkill("对" + targetPlayer.playerName + "说: 化作尘埃吧", skillName)
+		// player.loseHp(1)
+		// player.drawCard(3)
+		player.damage(targetPlayer, 100, "无双")
+		return true
+	}
+
+});

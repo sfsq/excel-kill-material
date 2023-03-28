@@ -1,0 +1,1028 @@
+function getClass(className) {
+	return java.lang.Class.forName(className, true, javaLoader);
+}
+
+// var classA_Q = getClass("excel.a.q")
+var classA_Q = java.lang.Class.forName("excel.a.q", true, javaLoader)
+// var classA_R = getClass("excel.a.r")
+var classA_R = java.lang.Class.forName("excel.a.r", true, javaLoader)
+var classA_U = java.lang.Class.forName("excel.a.u", true, javaLoader)
+var classA_E = java.lang.Class.forName("excel.a.e", true, javaLoader)
+var classA_C = java.lang.Class.forName("excel.a.c", true, javaLoader)
+var classA_J = java.lang.Class.forName("excel.a.j", true, javaLoader)
+var classA_T = java.lang.Class.forName("excel.a.t", true, javaLoader)
+var classA_D = java.lang.Class.forName("excel.a.d", true, javaLoader)
+var classA_P = java.lang.Class.forName("excel.a.p", true, javaLoader)
+var fieldSkillArray = classA_R.getDeclaredField("l");
+
+var fieldSettingsJSONObject = classA_R.getDeclaredField("Settings");
+
+
+var intClass = java.lang.Integer.TYPE
+// var fieldSkillName = classA_J.getDeclaredField("b");
+// var fieldSkillDescription = classA_J.getDeclaredField("c");
+
+
+var classObj = java.lang.Class.forName("java.lang.Object", true, javaLoader)
+
+var FileTextReader = java.lang.Class.forName("FileTextReader", true, javaLoader)
+
+var mopaiMethod = classA_Q.getMethod("a", [java.lang.String, java.lang.Integer.TYPE])
+var equalsMethod = classObj.getMethod("equals", [java.lang.Object])
+var getConstantStringMethod = FileTextReader.getMethod("getConstantString", [java.lang.String]);
+
+var skillImpl = {}
+
+var eventImpl = {}
+var commonEventImpl = {}
+
+var skillDescriptionChangeArray = [];
+
+var extraSkillList = []
+
+var extraWujiangList = []
+
+//"摸牌阶段":["英姿"]
+
+var eventSkillArrayMap = {}
+//"摸牌阶段:英姿": function
+var eventSkillTriggerImplMap = {}
+
+var playerSkillArrayHintMap = {}
+
+var cardTypeIdMap = {
+	"杀": 1,
+	"桃": 3,
+	"酒": 4,
+	"顺手牵羊": 13,
+	"欲擒故纵": 25,
+	"草船借箭": 26,
+	"以逸待劳": 21,
+	"望梅止渴": 23,
+	"文和乱武": 27,
+	"铁索连环": 9,
+	"桃园结义": 7,
+	"五谷丰登": 5,
+	"无中生有": 6,
+	"借刀杀人": 19,
+	"兵粮寸断": 10,
+	"过河拆桥": 14,
+	"万箭齐发": 16,
+	"乐不思蜀": 11,
+	"闪电": 12,
+	"决斗": 18,
+	"火攻": 8
+}
+var cardkkkey = '南'
+cardkkkey += '蛮'
+cardkkkey += '入'
+cardkkkey += '侵'
+cardTypeIdMap[cardkkkey] = 15
+
+function JavaConsole() {
+	this.log = function(str) {
+		javaContext.writeLog(String(str))
+	}
+}
+
+var console = new JavaConsole()
+
+function Player(q) {
+	this.orginalObject = q;
+	this._playerIdField = classA_Q.getDeclaredField("e");
+	this._playerIdField.setAccessible(true);
+	Object.defineProperty(this, 'healthVal', {
+		get: function() {
+			return this.orginalObject.C;
+		},
+		set: function(newValue) {
+			this.orginalObject.C = newValue
+		}
+	})
+	Object.defineProperty(this, 'healthLimitVal', {
+		get: function() {
+			return this.orginalObject.B;
+		},
+		set: function(newValue) {
+			this.orginalObject.B = newValue
+		}
+	})
+	Object.defineProperty(this, 'playerId', {
+		get: function() {
+			// return this.orginalObject.e;
+			return this._playerIdField.get(this.orginalObject);
+			// return 1
+		},
+		set: function(newValue) {
+			this.orginalObject.e = newValue
+		}
+	})
+	Object.defineProperty(this, 'playerName', {
+		get: function() {
+			return this.orginalObject.n;
+		},
+		set: function(newValue) {
+			this.orginalObject.n = toStr(newValue)
+		}
+	})
+
+	Object.defineProperty(this, 'isAlive', {
+		get: function() {
+			return !this.orginalObject.R;
+		},
+		set: function(newValue) {
+			this.orginalObject.R = !newValue
+		}
+	})
+	//  iget v0, p0, Lexcel/a/q;->sha:I
+	Object.defineProperty(this, 'damageCount', {
+		get: function() {
+			return this.orginalObject.shai;
+		},
+		set: function(newValue) {
+			this.orginalObject.shai = toStr(newValue)
+		}
+	})
+	this.isInPlayPhase = function() {
+		var tempField = classA_Q.getDeclaredField("cpjd");
+		tempField.setAccessible(true);
+		var tempObject = tempField.get(this.orginalObject)
+		// this.print(tempObject)
+		return tempObject != 0
+	}
+
+	this.classObject = java.lang.Class.forName("excel.a.q", true, javaLoader);
+
+	this.drawCard = function(nums) {
+
+		this.orginalObject.a(toStr("摸牌2"), nums)
+		return true
+	}
+	this.hasSkill = function(skillName) {
+		return this.orginalObject.n(toStr(skillName));
+	}
+	this.getSkill = function(skillName) {
+		var skillCode2 = findSkillCode(skillName)
+		this.orginalObject.i(skillCode2)
+		return true
+	}
+	this.lostSkill = function(skillName) {
+		return this.orginalObject.i(toStr(skillName));
+	}
+	this.invokeSkillTypeA = function(skillName) {
+		return this.orginalObject.k(toStr(skillName));
+	}
+	this.chooseAndInvokeSkill = function(skillName) {
+		this.orginalObject.xzmb(toStr(skillName));
+		return true
+	}
+	this.damage = function(player, damageCount, damageName) {
+		var cObject = this._getCObject()
+		cObject.a(player.orginalObject, this.orginalObject, damageCount, toStr(damageName));
+
+		return true
+	}
+	this.loseHp = function(loseCount, loseName) {
+		var cObject = this._getCObject()
+		cObject.a(this.orginalObject, null, loseCount, toStr(loseName));
+
+		return true
+	}
+	this.healHp = function(healCount) {
+		this.orginalObject.a(this.orginalObject, healCount, true)
+		return true
+	}
+	this._getUObject = function() {
+		var dField = classA_Q.getDeclaredField("d");
+		dField.setAccessible(true);
+		var uObject = dField.get(this.orginalObject)
+		return uObject
+	}
+	this._getEObject = function() {
+		var uObject = this._getUObject()
+		var bField = classA_U.getDeclaredField("b");
+		bField.setAccessible(true);
+		var eObject = bField.get(uObject)
+		return eObject
+	}
+	this._getCObject = function() {
+		var eObject = this._getEObject()
+		var eField = classA_E.getDeclaredField("e");
+		eField.setAccessible(true);
+		var cObject = eField.get(eObject)
+		return cObject
+	}
+	this._getSkillObject = function() {
+		var dField = classA_Q.getDeclaredField("E");
+		dField.setAccessible(true);
+		var uObject = dField.get(this.orginalObject)
+		return uObject
+	}
+	this._getDObject = function() {
+		var dField = classA_Q.getDeclaredField("a");
+		dField.setAccessible(true);
+		var uObject = dField.get(this.orginalObject)
+		return uObject
+	}
+	this.getCurrentPlayer = function() {
+		var dObject = this._getDObject()
+		var curPlayerIdField = classA_D.getDeclaredField("aj");
+		curPlayerIdField.setAccessible(true);
+		var curPlayerId = curPlayerIdField.get(dObject)
+		var tempField = classA_D.getDeclaredField("C");
+		tempField.setAccessible(true);
+		var qArray = tempField.get(dObject)
+		return new Player(qArray[curPlayerId])
+	}
+
+	this.getPlayerList = function(currentPlayer) {
+		var dObject = this._getDObject()
+		var tempField = classA_D.getDeclaredField("C");
+		tempField.setAccessible(true);
+		var qArray = tempField.get(dObject)
+		var playerList = []
+		if (currentPlayer) {
+			playerList.push(currentPlayer)
+			var curPlayerId = currentPlayer.playerId
+			var cnt = 1
+
+			for (var i = curPlayerId + 1; cnt <= 8; i++, cnt++) {
+
+				if (i > 8) {
+					i = 1
+				}
+				if (i == curPlayerId) {
+					continue
+				}
+				var player = new Player(qArray[i]);
+				if (player.isAlive) {
+					playerList.push(player)
+				}
+			}
+		} else {
+			for (var i = 1; i < qArray.length; i++) {
+				var player = new Player(qArray[i]);
+				if (player.isAlive) {
+					playerList.push(player)
+				}
+			}
+		}
+
+		return playerList
+	}
+	this.print = function(msg) {
+		var eObject = this._getEObject()
+		eObject.a(this.playerId, 0, msg)
+		// eObject.print(msg)
+		return true
+	}
+	this.printWithSkill = function(msg, skillName) {
+		var eObject = this._getEObject()
+		eObject.a(this.playerId, 0, msg, false, 0, toStr(skillName), toStr(skillName))
+
+	}
+	this.changeSkillDescription = function(skillName, info) {
+
+		if (!this.hasSkill(skillName)) {
+			return false
+		}
+		var skillArr = this._getSkillObject()
+
+		var len = skillArr.length
+		var i
+		for (i = 0; i < len; i++) {
+			var skillObject = skillArr[i]
+			if (skillObject.b == skillName) {
+				if (info.name) {
+					skillObject.b = toStr(info.name)
+				}
+				if (info.description) {
+					skillObject.c = toStr(info.description)
+				}
+				return true
+				// break;
+			}
+		}
+		// changeSkillInfo(skillName, info)
+		return true
+	}
+	this.confirmInvokeSkill = function(skillName, isNotOwned) {
+		if (!isNotOwned && !this.hasSkill(skillName)) {
+			return false
+		}
+		return this.orginalObject.xunwen(toStr(skillName))
+	}
+	this.confirmInvokeSkillToEnemy = function(skillName, player, isNotOwned) {
+		if (!isNotOwned && !this.hasSkill(skillName)) {
+			return false
+		}
+		return this.orginalObject.xunwen1(toStr(skillName), player.orginalObject)
+	}
+	this.confirmHint = function(hintMsg) {
+		// iget-object v3, v10, Lexcel/a/u;->b:Lexcel/a/e;
+
+		// const-string v4, "是否发动【啖酪】？"
+
+		// invoke-virtual {v3, v4}, Lexcel/a/e;->b(Ljava/lang/String;)V
+
+		// iget-object v1, v10, Lexcel/a/u;->a:Lexcel/a/d;
+
+		// iget-boolean v1, v1, Lexcel/a/d;->bz:Z
+		var eObject = this._getEObject()
+		eObject.b(hintMsg || "确认：选项1 取消：选项2")
+		var dObject = this._getDObject()
+		var tempField = classA_D.getDeclaredField("bz");
+		tempField.setAccessible(true);
+		var result = tempField.get(dObject)
+		return java.lang.Boolean.TRUE.equals(result)
+
+	}
+	this.useCard = function(cardName, skillName, handcardIndex) {
+		if (!cardName) {
+			return false
+		}
+		skillName = skillName || ""
+
+		handcardIndex = handcardIndex || 0
+
+		this.orginalObject.useCard(toStr(cardName), toStr(skillName), handcardIndex)
+		return true
+	}
+	this.checkValid = function(cardName, player, additionalParam) {
+		//    invoke-virtual {v11, p1, v0, v12, v7}, Lexcel/a/c;->jchfx2(Lexcel/a/q;Lexcel/a/q;Ljava/lang/String;Ljava/lang/String;)Z
+		var cObj = this._getCObject();
+		var targetPlayer = player || this
+		return cObj.jchfx(this.orginalObject, targetPlayer.orginalObject, toStr(cardName), toStr(additionalParam ||
+			""));
+
+	}
+
+	this.useCardWithTarget = function(cardName, player, additionalParam) {
+
+		// invoke-virtual {v3, v1, p0, v5}, Lexcel/a/c;->a(ILexcel/a/q;Lexcel/a/p;)Z
+		//invoke-virtual {v14,v13,v1,v15} Lexcel/a/q;->shiweiUseCard(Lexcel/a/q;Ljava/lang/String;Ljava/lang/String;)Z
+
+		if (!this.checkValid(cardName, player, additionalParam)) {
+			return false
+		}
+		this.orginalObject.shiweiUseCard(player.orginalObject, toStr(cardName), toStr(additionalParam || ""))
+		// var cObj = this._getCObject();
+		// var cardTypeId = findCardTypeId(cardName)
+		// var card = UseCardEvent.buildEvent(player)
+		// cObj.a(cardTypeId, this.orginalObject, card.orginalObject);
+		return true
+
+	}
+	this.skipPhase = function(phaseName) {
+		switch (phaseName) {
+			case "弃牌阶段":
+				this.orginalObject.setMarkInt("跳过弃牌阶段", 1);
+				break;
+			default:
+				break;
+		}
+	}
+	this.getCard = function(filterConditionName, isRandom) {
+		var cardId = this.orginalObject.hqzdp(toStr(filterConditionName), toStr(isRandom ? "随机" : "顺序"))
+		if (cardId && cardId > 0) {
+			this.orginalObject.getcard1(this.orginalObject, cardId, toStr("牌堆拿牌"))
+			return true
+		}
+
+		return false
+	}
+	this.markSkillUsed = function(skillName) {
+		if (skillName) {
+			this.orginalObject.o(toStr(skillName))
+		}
+	}
+	this.markString = function(keyName, val) {
+		return ""
+		// if(typeof(val) == "undefined"){
+		// return this.orginalObject.getMarkString(toStr(keyName))
+		// }else{
+		// this.orginalObject.setMarkString(keyName, val)
+		// return "333"
+		// }
+	}
+	// this.markInt = function(keyName, val){
+	// if(arguments.length < 2){
+	// return this.orginalObject.getMarkInt(toStr(keyName))
+	// }else{
+	// this.orginalObject.setMarkInt(toStr(keyName), boxingInt(val))
+	// }
+	// }
+
+}
+
+function UseCardEvent(p, config) {
+	this.orginalObject = p || classA_P.newInstance()
+	//iput-object v8, v5, Lexcel/a/p;->p:Lexcel/a/q;
+	if (config) {
+		var targetPlayer = config.targetPlayer;
+		if (Array.isArray(targetPlayer)) {
+			targetPlayer.forEach(function(player) {
+				this.orginalObject.setmubiao(player.orginalObject);
+			})
+		} else {
+			this.orginalObject.setmubiao(targetPlayer.orginalObject);
+		}
+	}
+	Object.defineProperty(this, 'targetPlayerNum', {
+		get: function() {
+			return this.orginalObject.mubiaoCount();
+		},
+		set: function(newValue) {
+			//this.orginalObject.R = !newValue
+		}
+	})
+	Object.defineProperty(this, 'cardPoint', {
+		get: function() {
+			var entityCardArray = this.orginalObject.h;
+			if (entityCardArray == null || entityCardArray.size() == 0) {
+				return ""
+			}
+			var cardUserQ = this.orginalObject.cardUser;
+			return cardUserQ == null ? "" : cardUserQ.dianshu(entityCardArray)
+
+		},
+		set: function(newValue) {
+			//this.orginalObject.R = !newValue
+		}
+	})
+	Object.defineProperty(this, 'cardSuit', {
+		get: function() {
+			var entityCardArray = this.orginalObject.h;
+			if (entityCardArray == null || entityCardArray.size() == 0) {
+				return ""
+			}
+			var cardUserQ = this.orginalObject.cardUser;
+
+			return cardUserQ == null ? "" : cardUserQ.huase(entityCardArray)
+
+		},
+		set: function(newValue) {
+			//this.orginalObject.R = !newValue
+		}
+	})
+	// this.orginalObject.e = toStr(skillName||"")
+}
+
+UseCardEvent.prototype.buildEvent = function(player) {
+	var targetPlayerList = []
+	targetPlayerList.push(player)
+	return new Card(null, {
+		targetPlayer: targetPlayerList
+	})
+}
+
+function toJsInt(javaIntValue) {
+	var x = java.lang.String.valueOf(javaIntValue);
+	var y = Number(x)
+	return y
+}
+
+function boxingInt(val) {
+	val = String(val);
+	var x = java.lang.Integer.parseInt(val);
+	var y = java.lang.Integer.valueOf(val);
+	return y;
+}
+
+
+function toStr(val) {
+
+	var x = getConstantStringMethod.invoke(null, val);
+	return x
+}
+
+function equals(val1, val2) {
+
+	var x = java.util.Objects.equals(val1, val2);
+	return x
+}
+
+function findCardTypeId(cardName) {
+	return cardTypeIdMap[cardName] || 1
+}
+
+function findSkillCode(skillName) {
+	var skillArray = fieldSkillArray.get(null)
+	var length = skillArray.length;
+	var i;
+	for (i = 1; i < length; i++) {
+		var skillObject = skillArray[i];
+		if (skillObject.b == skillName) {
+			return i;
+			// return skillObject.a;
+		}
+	}
+	return 0;
+}
+
+function redefineSkillInfo(info) {
+	if (Array.isArray(info)) {
+		info.forEach(function(item) {
+			redefineSkillInfo(item)
+		})
+		return true
+	}
+	var obj = {}
+	obj.skillName = info.skillName;
+	var newInfo = {}
+	newInfo.name = info.newSkillName
+	newInfo.description = info.description
+	obj.info = newInfo
+	skillDescriptionChangeArray.push(obj)
+	return true
+}
+
+function changeSkillInfo(skillName, info) {
+	var skillCode = findSkillCode(skillName)
+	if (skillCode > 0) {
+		var skillArray = fieldSkillArray.get(null)
+		var skillObject = skillArray[skillCode];
+		// fieldSkillName.set(skillObject, toStr(info.name||"未定"))
+		// fieldSkillDescription.set(skillObject,toStr(info.description||"未定"))
+		skillObject.b = toStr(info.name || skillObject.b)
+		skillObject.c = toStr(info.description || skillObject.c)
+		return true
+	}
+	return false
+}
+
+
+function defineEvent(eventName, handler) {
+	if (!eventName || !handler) {
+		return false
+	}
+	if (Array.isArray(eventName)) {
+		var i = 0;
+		var len = eventName.length
+		for (; i < len; i++) {
+			eventImpl[eventName[i]] = handler
+			// defineEvent(eventName[i], handler)
+		}
+		return true;
+	}
+
+	eventImpl[eventName] = handler
+	return true
+}
+
+function addSkillToEvent(eventName, skillName, skillImpl) {
+	if (!eventSkillArrayMap[eventName]) {
+		eventSkillArrayMap[eventName] = []
+	}
+
+	var keyName = eventName + ":" + skillName
+	if (!eventSkillTriggerImplMap[keyName]) {
+		eventSkillArrayMap[eventName].push(skillName)
+		if (eventName == "出牌阶段") {
+			playerSkillArrayHintMap[skillName + "决定"] = skillName
+		}
+		eventSkillTriggerImplMap[keyName] = skillImpl
+	}
+}
+
+function defineSkillTrigger(skillName, handler) {
+	if (!skillName || !handler) {
+		return false
+	}
+	var triggerPhase = handler.triggerPhase;
+	var triggerFunction = handler.triggerFunction
+	if (!triggerPhase || !triggerFunction) {
+		return false
+	}
+	if (Array.isArray(triggerPhase)) {
+		triggerPhase.forEach(function(item) {
+			addSkillToEvent(item, skillName, triggerFunction);
+		})
+		return true
+	} else {
+		addSkillToEvent(triggerPhase, skillName, triggerFunction);
+	}
+	return true
+
+}
+
+function defineSkill(skillName, handler) {
+	if (!skillName || !handler) {
+		return false
+	}
+	var implObj = {}
+	var invokeConditionSettingDefaultImpl = function() {
+		var retObj = {}
+		retObj.maxTargetNum = 1
+		return retObj
+	};
+	implObj.invokeConditionSetting = handler.invokeConditionSetting || invokeConditionSettingDefaultImpl;
+	implObj.targetCondition = handler.targetCondition || function() {
+		return true;
+	};
+	implObj.effect = handler.effect || function() {
+		return true;
+	};
+
+	skillImpl[skillName] = implObj
+	return true
+
+}
+
+function skillInvokeCondition(q, skillName) {
+	var implObj = skillImpl[skillName]
+	if (implObj) {
+		var setting = implObj.invokeConditionSetting(new Player(q), skillName);
+		if (setting) {
+			q.xzmbRenShu = setting.maxTargetNum || 1
+			return true;
+
+		}
+		return false
+	}
+	return false
+}
+
+function skillTargetCondition(q, targetQ, skillName) {
+	var implObj = skillImpl[skillName]
+	if (implObj) {
+		return implObj.targetCondition(new Player(q), new Player(targetQ), skillName)
+	}
+	return false
+}
+
+
+function skillEffect(q, targetQ, skillName) {
+	var implObj = skillImpl[skillName]
+	if (implObj) {
+		return implObj.effect(new Player(q), new Player(targetQ), skillName)
+	}
+	return false
+}
+
+function isPlayPhaseSkill(skillName) {
+	var evtSkillArr = eventSkillArrayMap["出牌阶段"]
+	return evtSkillArr && evtSkillArr.indexOf(skillName) >= 0
+}
+
+function getSkillNameByHintMsg(hintMsg) {
+	return toStr(playerSkillArrayHintMap[hintMsg] || "")
+}
+
+function endPhase(q, h) {
+	var implObj = eventImpl["结束阶段"]
+	return implObj && implObj(new Player(q))
+}
+
+function startPhase(q, h) {
+	var implObj = eventImpl["准备阶段"]
+	return implObj && implObj(new Player(q))
+}
+
+function judgePhase(q, h) {
+	var implObj = eventImpl["判定阶段"]
+	return implObj && implObj(new Player(q))
+}
+
+function drawCardPhase(q, h) {
+	var implObj = eventImpl["摸牌阶段"]
+	return implObj && implObj(new Player(q))
+}
+
+function gameStart(q, e) {
+	var implObj = eventImpl["游戏开始时"]
+	return implObj && implObj(new Player(q))
+}
+
+function playPhase(q, skillName) {
+	var implObj = eventImpl["出牌阶段"]
+	return implObj && implObj(new Player(q), skillName)
+}
+
+function getKeyName(eventName, skillName) {
+	return eventName + ":" + skillName
+}
+
+function getEventSkillTriggerImpl(eventName, skillName) {
+	return eventSkillTriggerImplMap[getKeyName(eventName, skillName)]
+}
+
+function getEventSkillTriggerArray(player, eventName) {
+	var evtSkillArr = eventSkillArrayMap[eventName]
+	return !evtSkillArr ? [] : evtSkillArr.filter(function(skillName) {
+			return player.hasSkill(skillName)
+		})
+		.map(function(skillName) {
+			return getEventSkillTriggerImpl(eventName, skillName)
+		})
+		.filter(function(implFunc) {
+			return !!implFunc
+		});
+}
+
+function defineCommonEvent(eventName, func) {
+	commonEventImpl[eventName] = func
+}
+
+function commonEvent(eventName) {
+	var args = [];
+	// return false
+	for (var i = 1; i < arguments.length; i++) {
+		args.push(arguments[i])
+	}
+
+
+	var func = commonEventImpl[eventName]
+	return func && func.apply(null, args);
+
+}
+
+function getStaticField(classObject, fieldName) {
+	var tempField = classObject.getField(fieldName)
+	tempField.setAccessible(true)
+	return tempField.get(null)
+}
+
+function invokeStaticMethod(classObject, methodName, paramList) {
+	var tempMethod = classObject.getDeclaredMethod(methodName)
+	tempMethod.setAccessible(true)
+	return tempMethod.invoke(null, paramList)
+}
+
+function addNewSkill(skillInfo) {
+	skillInfo && skillInfo.skillName && extraSkillList.push(skillInfo)
+}
+
+function addNewWujiang(wujiangInfo) {
+	extraWujiangList.push(wujiangInfo || {})
+}
+
+defineCommonEvent("新增技能", function(newList) {
+
+	var originalSkillArrayLength = Number(getStaticField(classA_R, "originalSkillArrayLength"));
+	var extraArray = extraSkillList.map(function(skillInfo, index) {
+			try {
+				var skill_id = boxingInt(originalSkillArrayLength + index);
+				var skillName = toStr(skillInfo.skillName);
+				var description = toStr(skillInfo.description || "");
+				var skillSound1 = toStr(skillInfo.skillSound1 || "");
+				var skillSound2 = toStr(skillInfo.skillSound2 || "");
+				var zero = boxingInt(0);
+				var one = boxingInt(1);
+				var constuctor = classA_J.getDeclaredConstructors()[1];
+				constuctor.setAccessible(true);
+
+
+				// return null
+				return constuctor.newInstance(skill_id, skillName, zero, zero, one, description,
+					skillSound1, skillSound2);
+			} catch (err) {
+				console.log("error" + err.message)
+
+			}
+			return null
+
+		})
+		.forEach(function(skill) {
+
+			// console.log("skill"+skill)
+			newList.add(skill)
+		})
+})
+
+// defineCommonEvent("新增技能", function(newList) {
+// var originalSkillArrayLength = getStaticField(classA_R, "originalSkillArrayLength")
+// // var originalSkillArrayLength= 0;
+// var extraArray = extraSkillList.map(function(skillInfo, index) {
+// var skill_id = boxingInt(originalSkillArrayLength + index)
+// var skillName = toStr(skillInfo.skillName)
+// var description = toStr(skillInfo.description || "")
+// var skillSound1 = toStr(skillInfo.skillSound1 || "")
+// var skillSound2 = toStr(skillInfo.skillSound2 || "")
+// var zero = boxingInt(0)
+// var one = boxingInt(1)
+// var constuctors = classA_J.getDeclaredConstructors()
+// var constructor;
+// for (var i = 0; i < constuctors.length; i++) {
+// if (constructors[i].getParameterCount() != 0) {
+// constructor = constuctors[i]
+// break;
+// }
+// }
+// return null
+// var constructor = classA_J.getDeclaredConstructors()[1]
+// constuctor.setAccessible(true)
+// return constuctor.newInstance(skill_id, skillName, zero, zero, one, description, skillSound1, skillSound2);
+
+// })
+// .forEach(function(skill) {
+// // newList.add(skill)
+// })
+// })
+
+defineCommonEvent("新增武将", function(newList) {
+
+	var originalWujiangArrayLength = Number(getStaticField(classA_R, "originalWujiangArrayLength"))
+	extraWujiangList.map(function(wujiangInfo, index) {
+			var wujiangId = boxingInt(originalWujiangArrayLength + index)
+			var name = toStr(wujiangInfo.name || ("diy" + index))
+			var extensionPackage = toStr(wujiangInfo.extensionPackage || "一将成名")
+			var healthLimitVal = boxingInt(wujiangInfo.healthLimitVal && wujiangInfo.healthLimitVal > 0 ?
+				wujiangInfo.healthLimitVal : 4)
+
+			var params = []
+			params.push(wujiangId)
+			params.push(name)
+			params.push(extensionPackage)
+			params.push(healthLimitVal)
+
+			var zero = boxingInt(0)
+			var one = boxingInt(1)
+
+			var skillList = wujiangInfo.skillList || []
+			var i = 0
+
+			for (; i < skillList.length && i < 4; i++) {
+				var skillCode2 = boxingInt(findSkillCode(skillList[i]))
+				params.push(skillCode2)
+			}
+			for (; i < 4; i++) {
+				params.push(zero)
+			}
+			params.push(false)
+			var country = toStr(wujiangInfo.country || "神")
+			var sex = toStr(wujiangInfo.sex || "男")
+			var pictureName = toStr("j" + (wujiangInfo.pictureName || "diy" + index) + ".png")
+			var deathSoundName = toStr((wujiangInfo.deathSoundName || "diy" + index + "_zhenwang"))
+			var deathWord = toStr(wujiangInfo.deathWord || "diy武将也会死？")
+			params.push(country)
+			params.push(sex)
+			params.push(pictureName)
+			params.push(deathSoundName)
+			params.push(deathWord)
+
+			var constuctor = classA_T.getDeclaredConstructors()[0]
+
+			constuctor.setAccessible(true)
+			return constuctor.newInstance(params)
+		})
+		.forEach(function(item) {
+			newList.add(item)
+		})
+
+
+})
+
+defineCommonEvent("弃牌阶段开始前", function(q) {
+	var implObj = eventImpl["弃牌阶段开始前"]
+	return implObj && implObj(new Player(q))
+})
+
+defineCommonEvent("成为目标时", function(q, cardUserQ, p, index) {
+	var implObj = eventImpl["成为目标时"]
+	return implObj && implObj(new Player(q), new Player(cardUserQ), new UseCardEvent(p), index)
+})
+
+defineCommonEvent("使用牌时", function(cardUserQ, q, p, index) {
+	var implObj = eventImpl["使用牌时"]
+	return implObj && implObj(new Player(cardUserQ), new UseCardEvent(p))
+})
+
+defineCommonEvent("使用结算结束后", function(cardUserQ, q, p, index) {
+	var implObj = eventImpl["使用结算结束后"]
+	return implObj && implObj(new Player(cardUserQ), new UseCardEvent(p))
+})
+
+
+defineEvent("游戏开始时", function(player) {
+	//  console.log("Settings"+fieldSettingsJSONObject)
+	var isOpen = true;
+	var Settings = fieldSettingsJSONObject.get(null);
+	try {
+		if (Settings != null && Settings.optString("自定义额外初始手牌") == "关") {
+			isOpen = false;
+		}
+	} catch (err) {
+		//	console.log("error" + err.message)
+	}
+
+
+	var list = player.getPlayerList()
+	if (Number(player.playerId) == 1 && isOpen) {
+
+		var cardArrText = javaContext.getText("initCard.txt");
+		if (cardArrText) {
+			var cardArr = cardArrText.split(",")
+			cardArr && cardArr.forEach(function(cardName) {
+
+				if (cardName == null) {
+					return
+				}
+				var cardN = cardName.trim()
+				if (cardN.length == 0 || cardN == "") {
+					return
+				}
+
+				player.getCard(toStr(cardN), false)
+			})
+		}
+	}
+	skillDescriptionChangeArray.forEach(function(skillDefinition) {
+		var skillName = skillDefinition.skillName;
+		var info = skillDefinition.info;
+		list.forEach(function(p) {
+
+			p.changeSkillDescription(skillName, info)
+		})
+		changeSkillInfo(skillName, info)
+
+	})
+	var evtSkillArr = getEventSkillTriggerArray(player, "游戏开始时")
+	evtSkillArr.forEach(function(implFunc) {
+		implFunc(player)
+	})
+
+})
+
+var phaseArray = ["准备阶段", "判定阶段", "摸牌阶段", "结束阶段", "弃牌阶段开始前"]
+phaseArray.forEach(function(eventName) {
+	defineEvent(eventName, function(player) {
+		var list = player.getPlayerList(player)
+		// player.print(JSON.stringify(list))
+
+		list.forEach(function(p) {
+			var evtSkillArr = getEventSkillTriggerArray(p, eventName)
+			evtSkillArr.forEach(function(implFunc) {
+				var isCurrentPlayer = p.playerId == player.playerId
+				implFunc(p, player, isCurrentPlayer)
+			})
+		})
+		return true
+	})
+	return true
+})
+
+defineEvent("出牌阶段", function(player, skillName) {
+	if (!player.hasSkill(skillName)) {
+		return false
+	}
+	var implFunc = getEventSkillTriggerImpl("出牌阶段", skillName)
+	implFunc && implFunc(player)
+	return true
+})
+
+defineEvent("成为目标时", function(targetPlayer, cardUserPlayer, card, index) {
+	var list = targetPlayer.getPlayerList(targetPlayer.getCurrentPlayer())
+	// player.print(JSON.stringify(list))
+	list.forEach(function(p) {
+		var evtSkillArr = getEventSkillTriggerArray(p, "成为目标时")
+		evtSkillArr.forEach(function(implFunc) {
+			implFunc(p, targetPlayer, cardUserPlayer, card, index)
+		})
+	})
+	return true
+})
+
+defineEvent("使用结算结束后", function(cardUserPlayer, card) {
+	if (!cardUserPlayer.isAlive) {
+		return
+	}
+	var list = cardUserPlayer.getPlayerList(cardUserPlayer.getCurrentPlayer())
+	// player.print(JSON.stringify(list))
+	list.forEach(function(p) {
+		var evtSkillArr = getEventSkillTriggerArray(p, "使用结算结束后")
+		evtSkillArr.forEach(function(implFunc) {
+			implFunc(p, cardUserPlayer, card)
+		})
+	})
+	return true
+})
+
+defineEvent("使用牌时", function(cardUserPlayer, card) {
+	if (!cardUserPlayer.isAlive) {
+		return
+	}
+	var list = cardUserPlayer.getPlayerList(cardUserPlayer.getCurrentPlayer())
+	// cardUserPlayer.print("使用牌时，花色为"+card.cardSuit)
+	// player.print(JSON.stringify(list))
+	list.forEach(function(p) {
+		var evtSkillArr = getEventSkillTriggerArray(p, "使用牌时")
+		evtSkillArr.forEach(function(implFunc) {
+			implFunc(p, cardUserPlayer, card)
+		})
+	})
+	return true
+})
+defineCommonEvent("武将登场时", function(q) {
+	var implObj = eventImpl["武将登场时"]
+	return implObj && implObj(new Player(q))
+})
+defineEvent("武将登场时", function(player) {
+	player.print("登场")
+	var evtSkillArr = getEventSkillTriggerArray(player, "武将登场时")
+	evtSkillArr.forEach(function(implFunc) {
+		implFunc(player)
+	})
+	return true
+})
+// console.log("加载中")
