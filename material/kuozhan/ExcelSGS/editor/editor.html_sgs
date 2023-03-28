@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>编辑器</title>
+	<meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<style>
+		body {
+			font-size: 16px;
+			font-family: Arial, sans-serif;
+		}
+		#container {
+			width: 90%;
+			margin: auto;
+			padding: 10px;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+		th, td {
+			padding: 10px;
+			text-align: center;
+			border: 1px solid black;
+			font-weight: bold;
+		}
+		th {
+			background-color: lightgray;
+		}
+		#edit {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: 100%;
+			background-color: rgba(0,0,0,0.5);
+			z-index: 999;
+		}
+		#edit-form {
+			display: block;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: white;
+			padding: 15px;
+			box-shadow: 0 0 10px rgba(0,0,0,0.5);
+		}
+		#edit-form label {
+			display: block;
+			margin-bottom: 5px;
+			font-weight: normal;
+		}
+		#edit-form input {
+			display: block;
+			width: 100%;
+			margin-bottom: 10px;
+			padding: 5px;
+			border: none;
+			border-bottom: 1px solid gray;
+		}
+		#edit-form button {
+			/* display: block; */
+			margin: auto;
+			padding: 5px 10px;
+			background-color: dodgerblue;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+		.clickInput{
+				border: solid 1px blue;
+				margin: 5px;
+				width: 100px;
+			}
+	</style>
+</head>
+<body>
+	<div>
+		已编辑关卡选择：
+		<select id="allLevels" onchange="changeAllLevels()" value="第1关">
+			
+		</select>
+		<button onclick="deleteLevel()">删除当前关卡</button>
+	</div>
+	<div  style="text-align: center;">
+		第<input id="level" type="text" style="width: 20px;" value="1" onchange="changeLevel()" />关关卡编辑
+	</div>
+	<div style="text-align: center;">
+		关卡名称<input id="levelName" type="text" onchange="changeLevelName()" value="初入乱世" />
+	</div>
+	<div style="text-align: center;">
+		<button onclick="saveTextFile()">保存文件</button><button onclick="readTextFile()">读取文件</button>
+	</div>
+	
+	<div id="container"></div>
+	<div id="edit">
+		<form id="edit-form">
+			<label>身份：</label>
+			<select id="identity">
+				<option value="我方">我方</option>
+				<option value="敌方">敌方</option>
+			</select>
+			<label>武将：</label>
+			<input type="text" id="name" oninput="wujiangSearch()" />
+			<div style="overflow: scroll;height: 300px;display: none;" id="result"></div>
+			<button type="button" id="save">保存</button>
+			<button type="button" id="cancel">取消</button>
+		</form>
+	</div>
+	<script>
+		const arr=['\u66f9'+'\u64cd','\u8bb8'+'\u891a','\u53f8'+'\u9a6c'+'\u61ff','\u590f'+'\u4faf'+'\u60c7','\u90ed'+'\u5609','\u5f20'+'\u8fbd','\u7504'+'\u59ec','\u5218'+'\u5907','\u5173'+'\u7fbd','\u5f20'+'\u98de','\u9a6c'+'\u8d85','\u8d75'+'\u4e91','\u8bf8'+'\u845b'+'\u4eae','\u9ec4'+'\u6708'+'\u82f1','\u5b59'+'\u6743','\u5468'+'\u745c','\u7518'+'\u5b81','\u5415'+'\u8499','\u9ec4'+'\u76d6','\u9646'+'\u900a','\u5b59'+'\u5c1a'+'\u9999','\u5927'+'\u4e54','\u5415'+'\u5e03','\u8c82'+'\u8749','\u534e'+'\u4f57','\u6b65'+'\u5175','\u5f13'+'\u5175','\u80e1'+'\u8f66'+'\u513f','\u9ec4'+'\u5dfe'+'\u8d3c','\u674e'+'\u5112','\u731b'+'\u864e'+'\u5175','\u9a91'+'\u5175','\u67aa'+'\u5175','\u85e4'+'\u7532'+'\u5175','\u94c1'+'\u9a91'+'\u5175','\u5f90'+'\u6c0f','\u65b0'+'\u5468'+'\u6cf0','\u66f9'+'\u4ec1','\u9ec4'+'\u5fe0','\u9b4f'+'\u5ef6','\u590f'+'\u4faf'+'\u6e0a','\u5c0f'+'\u4e54','\u5f20'+'\u89d2','\u5178'+'\u97e6','\u5e9e'+'\u5fb7','\u5e9e'+'\u7edf','\u592a'+'\u53f2'+'\u6148','\u5367'+'\u9f99','\u8340'+'\u5f67','\u989c'+'\u826f'+'\u6587'+'\u4e11','\u8881'+'\u7ecd','\u66f9'+'\u4e15','\u8463'+'\u5353','\u8d3e'+'\u8be9','\u9c81'+'\u8083','\u5b5f'+'\u83b7','\u5b59'+'\u575a','\u5f90'+'\u6643','\u795d'+'\u878d','\u4e8e'+'\u5409','\u5468'+'\u6cf0','\u5f20'+'\u90c3','\u9093'+'\u827e','\u59dc'+'\u7ef4','\u5218'+'\u7985','\u5b59'+'\u7b56','\u5f20'+'\u662d'+'\u5f20'+'\u7eae','\u5de6'+'\u6148','\u8521'+'\u6587'+'\u59ec','\u795e'+'\u8d75'+'\u4e91','\u795e'+'\u53f8'+'\u9a6c'+'\u61ff','\u4e8e'+'\u7981','\u795e'+'\u5173'+'\u7fbd','\u795e'+'\u5415'+'\u5e03','\u5f20'+'\u6625'+'\u534e','\u5434'+'\u56fd'+'\u592a','\u2606'+'\x53'+'\x50'+'\u8d75'+'\u4e91','\u8881'+'\u672f','\u9a6c'+'\u5cb1','\u2606'+'\x53'+'\x50'+'\u8c82'+'\u8749','\u795e'+'\u66f9'+'\u64cd','\u8340'+'\u6538','\u795e'+'\u5415'+'\u5e03','\u795e'+'\u5415'+'\u8499','\u9648'+'\u5bab','\u516c'+'\u5b59'+'\u74d2','\u5173'+'\u5174'+'\u5f20'+'\u82de','\u6b65'+'\u7ec3'+'\u5e08','\u5f90'+'\u76db','\u9648'+'\u7433','\u5218'+'\u8868','\u795e'+'\u8bf8'+'\u845b'+'\u4eae','\u795e'+'\u5468'+'\u745c','\u66f9'+'\u690d','\u6cd5'+'\u6b63','\u949f'+'\u4f1a','\u9ad8'+'\u987a','\u674e'+'\u5178','\u8bf8'+'\u845b'+'\u606a','\u7a0b'+'\u6631','\u738b'+'\u5141','\u5f20'+'\u5b9d','\u5468'+'\u4ed3','\u66f9'+'\u6602','\u9646'+'\u6297','\u5218'+'\u748b','\u8d85'+'\u7ea7'+'\u56fa'+'\u653f','\u97e9'+'\u6d69'+'\u53f2'+'\u6da3','\u4f55'+'\u592a'+'\u540e','\x52'+'\x45'+'\u5f90'+'\u76db','\u9ad8'+'\u8fbe'+'\u4e91','\u864e'+'\u7262'+'\u5e03','\x53'+'\x50'+'\u8521'+'\u6587'+'\u59ec','\x53'+'\x50'+'\u66f9'+'\u4ec1','\u754c'+'\x53'+'\x50'+'\u5173'+'\u7fbd','\x53'+'\x50'+'\u8d3e'+'\u8be9','\u987e'+'\u96cd','\x53'+'\x50'+'\u9a6c'+'\u8d85','\x53'+'\x50'+'\u5e9e'+'\u5fb7','\x53'+'\x50'+'\u5b59'+'\u5c1a'+'\u9999','\u66f9'+'\u4f11','\u66f9'+'\u5f70','\u8d75'+'\u5b50'+'\u9f99','\u4e50'+'\u8fdb','\u5f20'+'\u661f'+'\u5f69','\u738b'+'\u5f02','\x53'+'\x50'+'\u59dc'+'\u7ef4','\u5f90'+'\u5eb6','\u7518'+'\u592b'+'\u4eba','\u5173'+'\u5e73','\u5218'+'\u534f','\u754c'+'\u534e'+'\u96c4','\u5218'+'\u5c01','\u6731'+'\u6853','\x45'+'\x4b'+'\u5927'+'\u4e54','\u97e9'+'\u5f53','\u51cc'+'\u7edf','\u6f58'+'\u748b'+'\u9a6c'+'\u5fe0','\x52'+'\x45'+'\u5218'+'\u8868','\x52'+'\x45'+'\u8881'+'\u672f','\u4f0f'+'\u5b8c','\u5168'+'\u742e','\u534e'+'\u96c4','\u590f'+'\u4faf'+'\u6c0f','\u674e'+'\u4e50','\u6f58'+'\u51e4','\u7530'+'\u4e30','\u90ed'+'\u56fe'+'\u9004'+'\u7eaa','\u9a6c'+'\u8c21','\u5173'+'\u94f6'+'\u5c4f','\x53'+'\x50'+'\u8c82'+'\u8749','\u590f'+'\u4faf'+'\u9738','\u516c'+'\u5b59'+'\u6e0a','\u5f20'+'\u5db7','\u5218'+'\u8c0c','\u66f9'+'\u53e1','\u754c'+'\u66f9'+'\u64cd','\u754c'+'\u8bb8'+'\u891a','\u754c'+'\u53f8'+'\u9a6c'+'\u61ff','\u754c'+'\u590f'+'\u4faf'+'\u60c7','\u754c'+'\u8881'+'\u7ecd','\u754c'+'\u9646'+'\u900a','\x53'+'\x50'+'\u8463'+'\u5353','\u6ee1'+'\u5ba0','\u66f9'+'\u51b2','\u754c'+'\u5f20'+'\u98de','\u754c'+'\u9a6c'+'\u8d85','\u754c'+'\u8d75'+'\u4e91','\u8bf8'+'\u845b'+'\u8bde','\u5b59'+'\u7693','\u51cc'+'\u64cd','\u754c'+'\u5468'+'\u745c','\u674e'+'\u4e30','\u754c'+'\u5415'+'\u8499','\u754c'+'\u9ec4'+'\u76d6','\u90ed'+'\u6dee','\x4a'+'\x53'+'\x50'+'\u5b59'+'\u5c1a'+'\u9999','\u754c'+'\u5927'+'\u4e54','\u754c'+'\u5415'+'\u5e03','\u6cae'+'\u6388','\u754c'+'\u534e'+'\u4f57','\u5f20'+'\u677e','\u754c'+'\u516c'+'\u5b59'+'\u74d2','\u754c'+'\u5f90'+'\u5eb6','\u754c'+'\u674e'+'\u5178','\u754c'+'\u9b4f'+'\u5ef6','\u754c'+'\u9ec4'+'\u5fe0','\u5140'+'\u7a81'+'\u9aa8','\u754c'+'\u795d'+'\u878d','\u5173'+'\u7d22','\u5ed6'+'\u5316','\u848b'+'\u742c'+'\u8d39'+'\u794e','\x4f'+'\x4c'+'\u4e8e'+'\u7981','\u9eb9'+'\u4e49','\u58eb'+'\u71ee','\u5b59'+'\u4e7e','\u2606'+'\x53'+'\x50'+'\u5415'+'\u8499','\u8521'+'\u9095','\u6768'+'\u4fee','\u6731'+'\u7136','\x4f'+'\x4c'+'\u5b59'+'\u7693','\u6731'+'\u6cbb','\u5d47'+'\u5eb7','\u620f'+'\u5fd7'+'\u624d','\x52'+'\x45'+'\u9a6c'+'\u8c21','\u65b0'+'\u6cd5'+'\u6b63','\u84af'+'\u8d8a'+'\x26'+'\u84af'+'\u826f','\u754c'+'\u5173'+'\u7fbd','\u5b59'+'\u8339','\u738b'+'\u6717','\u9648'+'\u7fa4','\u9a6c'+'\u826f','\u4e01'+'\u5949','\u9a6c'+'\u4e91'+'\u7984','\u65b0'+'\u5173'+'\u5f20','\u865e'+'\u7ffb','\u5b59'+'\u4f11','\u7956'+'\u8302','\u4f0f'+'\u7687'+'\u540e','\u66f9'+'\u771f','\u725b'+'\u91d1','\u5218'+'\u865e','\u8bf8'+'\u845b'+'\u747e','\u795e'+'\u5de6'+'\u6148','\u795e'+'\u5de6'+'\u6148'+'\x32','\u5f20'+'\u9c81','\u8521'+'\u592b'+'\u4eba','\u5b54'+'\u878d','\u5468'+'\u9c82','\u5434'+'\u61ff','\u738b'+'\u5e73','\u66f9'+'\u64cd','\u5927'+'\u4e54','\u8c82'+'\u8749','\u7518'+'\u5b81','\u5173'+'\u7fbd','\u90ed'+'\u5609','\u534e'+'\u4f57','\u9ec4'+'\u76d6','\u9ec4'+'\u6708'+'\u82f1','\u5218'+'\u5907','\u9646'+'\u900a','\u5415'+'\u5e03','\u5415'+'\u8499','\u9a6c'+'\u8d85','\u53f8'+'\u9a6c'+'\u61ff','\u5b59'+'\u6743','\u5b59'+'\u5c1a'+'\u9999','\u590f'+'\u4faf'+'\u60c7','\u8bb8'+'\u891a','\u5f20'+'\u98de','\u5f20'+'\u8fbd','\u8d75'+'\u4e91','\u7504'+'\u59ec','\u5468'+'\u745c','\u8bf8'+'\u845b'+'\u4eae','\u5f90'+'\u6643','\u5e9e'+'\u5fb7','\u5b5f'+'\u83b7','\u590f'+'\u4faf'+'\u6e0a','\u59dc'+'\u7ef4','\u5178'+'\u97e6','\u5468'+'\u6cf0','\u9ec4'+'\u5fe0','\u795d'+'\u878d','\u5b59'+'\u575a','\u989c'+'\u826f'+'\u6587'+'\u4e11','\u2606'+'\x53'+'\x50'+'\u5218'+'\u5907','\u4f55'+'\u8fdb','\u795e'+'\u8463'+'\u5353','\u738b'+'\u57fa','\u7a0b'+'\u666e','\u795e'+'\u8521'+'\u592b'+'\u4eba','\u5927'+'\u4e54'+'\u5c0f'+'\u4e54','\u7075'+'\u96ce','\u53f8'+'\u9a6c'+'\u6717','\u9b51','\u9b45','\u9b4d','\u9b49','\u725b'+'\u5934','\u9a6c'+'\u9762','\u9ed1'+'\u65e0'+'\u5e38','\u767d'+'\u65e0'+'\u5e38','\u591c'+'\u53c9','\u7f57'+'\u5239','\u674e'+'\u901a','\u7559'+'\u8d5e','\u9676'+'\u8c26','\u65f1'+'\u9b43','\u848b'+'\u94a6','\u949f'+'\u7e47','\x52'+'\x45'+'\u5168'+'\u742e','\u8d75'+'\u8944','\u754c'+'\u5f20'+'\u8fbd','\u2606'+'\u5e9e'+'\u7edf','\u5218'+'\u7e47','\u5218'+'\u7109','\u8bf8'+'\u845b'+'\u77bb','\u4e25'+'\u989c','\u90dd'+'\u662d','\u9646'+'\u7ee9','\u5b59'+'\u767b','\u66f9'+'\u7eaf','\u7cdc'+'\u7afa','\u795e'+'\u9646'+'\u900a','\u9648'+'\u5230','\u8bf8'+'\u845b'+'\u679c','\x4f'+'\x4c'+'\u738b'+'\u5f02','\u795e'+'\u5f20'+'\u8fbd','\u848b'+'\u5e72','\u9c8d'+'\u4e09'+'\u5a18','\u503e'+'\u56fd'+'\u5973'+'\u5b50','\u575a'+'\u5b9e'+'\u5b9d'+'\u7bb1','\u8bb8'+'\u9756','\u7962'+'\u8861','\u66f9'+'\u5a74','\u6c99'+'\u6469'+'\u67ef','\u5218'+'\u7426','\u8d3e'+'\u9035','\u674e'+'\u5095','\u7687'+'\u752b'+'\u5d69','\u754c'+'\u590f'+'\u4faf'+'\u6e0a','\u754c'+'\u5367'+'\u9f99','\u5b59'+'\u9c81'+'\u80b2','\u8d3a'+'\u9f50','\u754c'+'\u5f20'+'\u5db7','\u738b'+'\u53cc','\u795e'+'\u7504'+'\u59ec','\u754c'+'\u5b59'+'\u6743','\u754c'+'\u5218'+'\u5907','\x4f'+'\x4c'+'\u754c'+'\u534e'+'\u96c4','\x53'+'\x50'+'\u9c81'+'\u829d','\u8463'+'\u5141','\u5351'+'\u5f25'+'\u547c','\u6587'+'\u8058','\u5b59'+'\u9c81'+'\u73ed','\u754c'+'\u5b59'+'\u9c81'+'\u73ed','\u5f20'+'\u8ba9','\u5218'+'\u8fa9','\u66f9'+'\u6027','\u5510'+'\u54a8','\u5f20'+'\u7ee3','\u5f20'+'\u7ffc','\u90a2'+'\u9053'+'\u8363','\u590f'+'\u4faf'+'\u6770','\u9ec4'+'\u7956','\u6a0a'+'\u7a20','\u9a86'+'\u7edf','\u536b'+'\u6e29'+'\u8bf8'+'\u845b'+'\u76f4','\u8e4b'+'\u987f','\u754c'+'\u6731'+'\u7136','\u754c'+'\u5173'+'\u5e73','\x4f'+'\x4c'+'\u90ed'+'\u6dee','\u754c'+'\u5f90'+'\u76db','\u795e'+'\u592a'+'\u53f2'+'\u6148','\u5ba1'+'\u914d','\u4e25'+'\u756f','\u4e01'+'\u539f','\u4e18'+'\u529b'+'\u5c45','\u754c'+'\u7504'+'\u59ec','\u6bb5'+'\u7168','\u5362'+'\u690d','\u754c'+'\u738b'+'\u5f02','\u754c'+'\u989c'+'\u826f'+'\u6587'+'\u4e11','\u754c'+'\u66f9'+'\u5f70','\u754c'+'\u5f20'+'\u90c3','\u543e'+'\u5f66','\u738b'+'\u6843','\u738b'+'\u60a6','\u6731'+'\u5101','\u754c'+'\u5b59'+'\u575a','\u5fd9'+'\u7259'+'\u957f','\u5415'+'\u73b2'+'\u7eee','\u5415'+'\u8654','\u754c'+'\u7518'+'\u5b81','\u754c'+'\u5e9e'+'\u7edf','\u9093'+'\u829d','\u6731'+'\u7075','\u5f20'+'\u864e','\x53'+'\x50'+'\u5f20'+'\u90c3','\u5f20'+'\u6881','\u7f8a'+'\u795c','\u5b97'+'\u9884','\u754c'+'\u8340'+'\u5f67','\u674e'+'\u5a49','\u738b'+'\u6636','\u4f55'+'\u8fdb','\u754c'+'\u66f9'+'\u4f11','\u754c'+'\u90ed'+'\u56fe'+'\u9004'+'\u7eaa','\u754c'+'\u5b59'+'\u7b56','\u80e1'+'\u73ed','\u675c'+'\u5914','\u66f9'+'\u723d','\u8d75'+'\u4fe8','\u6587'+'\u9e2f','\u5f20'+'\u606d','\u6768'+'\u5a49','\u754c'+'\u97e9'+'\u5f53','\u9646'+'\u51ef','\u8bb8'+'\u6538','\u5f20'+'\u660c'+'\u84b2','\u795e'+'\u5218'+'\u5907','\u674e'+'\u5f02'+'\u8c22'+'\u65cc','\u795e'+'\u5f20'+'\u89d2','\u5468'+'\u5ba3','\u9ec4'+'\u627f'+'\u5f66','\u5173'+'\u5b81','\u8bb8'+'\u52ad','\u754c'+'\u6a0a'+'\u7a20'];
+		var data = {
+			"第1关": {
+			   "关卡名称":"初入乱世",
+				"1号位": {
+					"身份": "我方",
+					"武将": "卧龙"
+				},
+				"3号位": {
+					"身份": "我方",
+					"武将": "戏志才"
+				},
+				"8号位": {
+					"身份": "敌方",
+					"武将": "藤甲兵"
+				}
+			},
+			"第2关": {
+			   "关卡名称":"初入乱世2",
+				"1号位": {
+					"身份": "我方",
+					"武将": "卧龙1"
+				},
+				"3号位": {
+					"身份": "我方",
+					"武将": "戏志才1"
+				},
+				"8号位": {
+					"身份": "敌方",
+					"武将": "藤甲兵2"
+				}
+			}
+		};
+		var currentLevel = "第1关"; // 当前关卡
+		var editingPosition = null; // 正在编辑的座位号
+		//调用Android方法
+		function saveTextFile() {
+	        try{
+			var input = JSON.stringify(data);
+			android.saveTextFile("fuben.json", input); // boolean类型返回值
+			}catch(err){
+			    alert("err:"+err)
+			}
+
+		}
+		function readTextFile() {
+		        try{
+			var text = android.readTextFile("fuben.json");
+			//eval("data = "+text);
+			data = JSON.parse(text);
+			refreshLevels()
+			renderTable();
+						}catch(err){
+			    alert("err:"+err)
+			}
+		}
+
+		function deleteLevel(){
+			let list = Object.keys(data)
+			if(list.length <= 1){
+				alert('不能删除唯一的关卡')
+				return;
+			}
+			delete data[currentLevel];
+			currentLevel = Object.keys(data)[0]
+			refreshLevels()
+			renderTable();
+			document.getElementById('allLevels').value=currentLevel;
+			let selectKey=currentLevel.substr(1, currentLevel.length-2);
+			document.getElementById('level').value=selectKey
+		}
+		function changeAllLevels(){
+			let selectKey = document.getElementById("allLevels").value
+			currentLevel=selectKey;
+			selectKey=selectKey.substr(1, selectKey.length-2);
+			document.getElementById('level').value=selectKey
+			renderTable() 
+		}
+		function setValue(val){
+			document.getElementById("name").value=val
+			hideResult()
+		}
+		function refreshLevels(){
+			let html = '';
+			for(k in data){
+				let levelName=data[k]['关卡名称'];
+				html +='<option value="'+k+'">'+k+' : '+levelName+'</option>';
+			}
+			document.getElementById("allLevels").innerHTML = html;
+		}
+		function hideResult(){
+			document.getElementById("result").innerHTML=''
+			document.getElementById("result").style.display='none';
+		}
+		function wujiangSearch(){
+			try{
+				let val =document.getElementById("name").value||''
+				if(!val){
+					hideResult()
+					return;
+				}
+				let list = arr.filter(item=>item.includes(val))
+				
+				if(list&&list.length){
+					let html = '<div>点击名字放入武将:</div>';
+					list.forEach(item=>{
+						html += '<div class="clickInput" onclick="setValue('+"'"+item+"'"+')">'+item+'</div>'
+					}) 
+					console.log('list',list)
+					document.getElementById("result").style.display='block';
+					document.getElementById("result").innerHTML = html
+				}else{
+					hideResult()
+				}
+			}catch(err){
+				console.log(err)
+			}
+
+			// alert(val)
+		}
+		function changeLevel(){
+			let value = document.getElementById('level').value
+			if(!value || isNaN(value)){
+				document.getElementById('level').value = '1';
+				value='1';
+			}
+			currentLevel = "第"+value+"关"; 
+			if(!data[currentLevel]){
+				data[currentLevel] = {
+					"关卡名称": currentLevel,
+					"1号位": {
+						"身份": "我方",
+						"武将": "曹"+"操"
+					}
+				}
+				refreshLevels()
+			}
+			document.getElementById("allLevels").value=currentLevel
+			
+			renderTable() 
+		}
+		function changeLevelName(){
+			let value = document.getElementById('levelName').value||currentLevel
+			data[currentLevel]["关卡名称"]=value;
+		}
+		// 生成表格
+		function renderTable() {
+			var tableHtml = '<table>';
+			tableHtml += '<tr><th>座位号</th><th>身份</th><th>武将</th><th>操作</th></tr>';
+			for (var i = 1; i <= 8; i++) {
+				var seatNumber = i + '号位';
+				var identity = '';
+				var name = '';
+				if (data[currentLevel][seatNumber]) {
+					identity = data[currentLevel][seatNumber]['身份'];
+					name = data[currentLevel][seatNumber]['武将'];
+				}
+				tableHtml += '<tr>';
+				tableHtml += '<td>' + seatNumber + '</td>';
+				tableHtml += '<td>' + identity + '</td>';
+				tableHtml += '<td>' + name + '</td>';
+				// 一行中最后一列添加操作按钮
+									tableHtml += '<td><button type="button" class="edit" data-seat="' + seatNumber + '">编辑</button> <button type="button" class="delete" data-seat="' + seatNumber + '">删除</button></td>';
+			
+				tableHtml += '</tr>';
+			}
+			tableHtml += '</table>';
+			document.getElementById('container').innerHTML = tableHtml;
+			document.getElementById('levelName').value = data[currentLevel]["关卡名称"]||''
+		}
+		// 显示编辑窗口
+		function showEditForm(seatNumber) {
+			editingPosition = seatNumber;
+        	if(data[currentLevel]&&data[currentLevel][seatNumber]){
+    			document.getElementById('identity').value = data[currentLevel][seatNumber]['身份'];
+    			document.getElementById('name').value = data[currentLevel][seatNumber]['武将'];
+    			document.getElementById('edit').style.display = 'block';
+    		}else{
+    			document.getElementById('identity').value = "我方";
+    			document.getElementById('name').value = "";
+    			document.getElementById('edit').style.display = 'block';
+			}
+		}
+		// 隐藏编辑窗口
+		function hideEditForm() {
+			editingPosition = null;
+			document.getElementById('edit').style.display = 'none';
+		}
+		// 保存编辑结果
+		function saveData() {
+			var identity = document.getElementById('identity').value;
+			var name = document.getElementById('name').value;
+			if (!data[currentLevel][editingPosition]) {
+				data[currentLevel][editingPosition] = {};
+			}
+			data[currentLevel][editingPosition]['身份'] = identity;
+			data[currentLevel][editingPosition]['武将'] = name;
+			renderTable();
+			hideEditForm();
+		}
+		// 删除数据
+		function deleteData(seatNumber) {
+			delete data[currentLevel][seatNumber];
+			renderTable();
+		}
+		// 绑定编辑按钮事件
+		document.addEventListener('click', function(event) {
+			if (event.target && event.target.classList.contains('edit')) {
+				showEditForm(event.target.dataset.seat);
+			}
+			if (event.target && event.target.classList.contains('delete')) {
+				deleteData(event.target.dataset.seat);
+			}
+		});
+		// 绑定编辑窗口按钮事件
+		document.getElementById('save').addEventListener('click', saveData);
+		document.getElementById('cancel').addEventListener('click', hideEditForm);
+		// 绑定切换关卡事件
+		document.addEventListener('click', function(event) {
+			if (event.target && event.target.tagName == 'A') {
+				event.preventDefault();
+				currentLevel = event.target.dataset.level;
+				renderTable();
+			}
+		});
+		// 初始化
+		renderTable();
+		refreshLevels()
+
+	</script>
+</body>
+</html>
